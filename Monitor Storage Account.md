@@ -62,6 +62,4 @@ StorageBlobLogs
 ```
 
 
-
-
 enter image description here

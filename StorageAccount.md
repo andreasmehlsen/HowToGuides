@@ -46,6 +46,28 @@ StorageBlobLogs
 | sort by ErrorCount desc
 ```
 
+## KQL Query to View all Connections in storage account
+Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure Storage blob
+
+```kql
+StorageBlobLogs
+| where OperationName in ("GetBlob", "PutBlob", "DeleteBlob")  // focus on read/write ops
+| project
+    TimeGenerated,
+    RequesterAppId,
+    CallerIpAddress,
+    Uri,
+    AuthenticationType,
+    Protocol,
+    RequestBodySize,
+    ResponseBodySize
+| order by TimeGenerated desc
+```
+
+
+
+
+
 ## Output
 
 ![enter image description here](#)
