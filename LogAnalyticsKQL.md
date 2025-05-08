@@ -35,6 +35,8 @@ AzureDiagnostics
 ## KQL Query to View all Connections in storage account
 Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure Storage blob
 
+[Azure Storage Account KQLs](https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage?tabs=azure-portal)
+
 ```kql
 StorageBlobLogs
 | where OperationName in ("GetBlob", "PutBlob", "DeleteBlob")  // focus on read/write ops
@@ -50,8 +52,35 @@ StorageBlobLogs
 | order by TimeGenerated desc
 ```
 
+## KQL Query to View all Connections in Web apps
+Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure Web apps
 
+```kql
+AppServiceHTTPLogs 
+| where ScStatus == 200
+```
 
+Top 15 machines which are generating traffic.
 
+```kql
+AppServiceHTTPLogs
+| top-nested of _ResourceId by dummy=max(0), // Display results for each resource (App)
+  top-nested 15 of CIp by count()
+| project-away dummy // Remove dummy line from the result set
+```
+
+## KQL Query to View all Connections in App Configuration
+Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure App Configuration
+
+[Azure App Configuration KQLs](https://learn.microsoft.com/en-us/azure/azure-app-configuration/monitor-app-configuration?tabs=portal)
+
+List the number of requests sent in the last three days by IP Address
+
+```kql
+AACHttpRequest
+    | where TimeGenerated > ago(3d)
+    | summarize requestCount=sum(HitCount) by ClientIPAddress
+    | order by requestCount desc
+```
 
 ## Output
