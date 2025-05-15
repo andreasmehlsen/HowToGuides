@@ -1,6 +1,10 @@
 # Azure Log analytics workspace KQLs
 
-To check the traffic logs for Azure Storage and see the connections blocked by Firewall settings in Networking, follow these steps.
+To check the traffic logs for Azure log analytics workspace for different resource types.
+
+Here is a 
+
+[Azure Monitor log analytics sample queries KQLs](https://learn.microsoft.com/en-us/azure/azure-monitor/reference/queries-by-table)
 
 ## Testing Scenario
 For testing, disable Public network access in the storage account. Then, attempt to access a blob. If the firewall is blocking the connection, you will observe failed access attempts.
@@ -8,7 +12,8 @@ For testing, disable Public network access in the storage account. Then, attempt
 ![enter image description here](#)
 
 ## Enable Diagnostic Settings
-Skip this step if diagnostic settings are already set up.
+
+In order to conduct the traffic logs, then Diagnostic Settings should be enabled for the resources.
 
 ## Check Failures in Insights
 1. Navigate to **Insights** > **Failures**.
@@ -32,7 +37,7 @@ AzureDiagnostics
 | order by TimeGenerated desc
 ```
 
-## KQL Query to View all Connections in storage account
+## KQL Query to View all Blob Connections in storage account
 Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure Storage blob
 
 [Azure Storage Account KQLs](https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage?tabs=azure-portal)
@@ -52,6 +57,70 @@ StorageBlobLogs
 | order by TimeGenerated desc
 ```
 
+## KQL Query to View all Table Connections in storage account
+Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure Storage blob
+
+[Azure Storage Account KQLs](https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage?tabs=azure-portal)
+
+```kql
+StorageTableLogs
+| where OperationName in ("QueryTable", "InsertEntity", "UpdateEntity", "DeleteEntity")  // focus on read/write ops
+| project
+    TimeGenerated,
+    OperationName,
+    RequesterAppId,
+    CallerIpAddress,
+    Uri,
+    AuthenticationType,
+    Protocol,
+    RequestBodySize,
+    ResponseBodySize
+| order by TimeGenerated desc
+```
+
+## KQL Query to View all Queue Connections in storage account
+Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure Storage blob
+
+[Azure Storage Account KQLs](https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage?tabs=azure-portal)
+
+```kql
+StorageQueueLogs
+| where OperationName in ("GetMessages", "PutMessage", "DeleteMessage", "PeekMessages", "UpdateMessage")
+| project
+    TimeGenerated,
+    OperationName,
+    RequesterAppId,
+    CallerIpAddress,
+    Uri,
+    AuthenticationType,
+    Protocol,
+    RequestBodySize,
+    ResponseBodySize
+| order by TimeGenerated desc
+```
+
+## KQL Query to View all File Connections in storage account
+Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure Storage blob
+
+[Azure Storage Account KQLs](https://learn.microsoft.com/en-us/azure/storage/blobs/monitor-blob-storage?tabs=azure-portal)
+
+```kql
+StorageFileLogs
+| where OperationName in ("CreateFile", "DeleteFile", "WriteFile", "ReadFile", "ListFilesAndDirectories")
+| project
+    TimeGenerated,
+    OperationName,
+    RequesterAppId,
+    CallerIpAddress,
+    Uri,
+    AuthenticationType,
+    Protocol,
+    RequestBodySize,
+    ResponseBodySize
+| order by TimeGenerated desc
+```
+
+
 ## KQL Query to View all Connections in Web apps
 Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure Web apps
 
@@ -67,6 +136,15 @@ AppServiceHTTPLogs
 | top-nested of _ResourceId by dummy=max(0), // Display results for each resource (App)
   top-nested 15 of CIp by count()
 | project-away dummy // Remove dummy line from the result set
+```
+
+## KQL Query to View all Connections in Web apps
+Use the following Kusto Query Language (KQL) query to check the traffic logs for Azure SQL
+
+```kql
+AzureDiagnostics
+| where ResourceProvider == "MICROSOFT.SQL"
+| summarize AggregatedValue = count() by clientIP_s
 ```
 
 ## KQL Query to View all Connections in App Configuration
