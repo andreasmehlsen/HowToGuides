@@ -64,7 +64,15 @@ StorageBlobLogs
 | order by TimeGenerated desc
 ```
 
+## KQL Query to view PublicAccess and allowBlobPublicAccess in storage account
+Use the following Kusto Query Language (KQL) query to check the PublicAccess and if BlobPublicAccess is allowed
 
+```kql
+resources
+| where type =~ 'microsoft.storage/storageaccounts'
+| where properties.allowBlobPublicAccess == true
+| project name, location, properties.publicNetworkAccess, properties.allowBlobPublicAccess
+```
 
 
 
